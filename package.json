@@ -1,0 +1,15 @@
+{
+  "name": "fivem-status-nicokage",
+  "version": "2.0.0",
+  "description": "fetch status fivem by nicokage, dodoskizy and Us Collective Support (P.S.: same people, lmao)",
+  "main": "fivem.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Nicokage#4019",
+  "license": "ISC",
+  "dependencies": {
+    "cfx-api": "^1.2.0",
+    "discord.js": "^14.15.3"
+  }
+}
