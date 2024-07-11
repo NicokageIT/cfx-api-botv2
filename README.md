@@ -26,7 +26,9 @@ DISCLAIMER: remember in the "Bot" section to activate all three privileges in "P
 /server-info {code} --> generates an embed message with several fields of server information via the cfx.re/join code
 
 # bonus
-I created an event called "checkCfxStatus" which updates via a message in a configurable channel of your choice in the variables above the status of cfx.re. Performs a check every minute. If you want a check every few minutes just enter the following string. If it doesn't work for me, let me know immediately and I will try to fix it. I haven't been able to test it yet as I need to create my own status page bees.
+I created an event called "checkCfxStatus" which updates via a message in a configurable channel of your choice in the variables above the status of cfx.re. Performs a check every minute. If you want a check every few minutes just enter the "following" string. If it doesn't work for me, let me know immediately and I will try to fix it. I haven't been able to test it yet as I need to create my own status page bees.
+
+> "follow" string: setInterval(checkCfxStatus, 5 * 60 * 1000); // Check status every 5 minute
 
 # Contact me on discord if you've had a problem: Nicokage#0 for serious issues
 
