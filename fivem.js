@@ -1,13 +1,14 @@
 const { Client, GatewayIntentBits, EmbedBuilder, REST, Routes, AttachmentBuilder } = require('discord.js');
 const cfx = require('cfx-api');
 const fs = require('fs')
+const axios = require('axios')
 
 // Create a new Discord client
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 
 const TOKEN = 'why_did.you,want:to;spy@on!my°token?'; // Replace with your bot's token
-const CHANNEL_ID = '1260871520004083724'; // Replace with your desired channel ID
+const CHANNEL_ID = '1256200698090225756'; // Replace with your desired channel ID
 const CLIENT_ID = '1259088968444674050'; // Replace with your bot's client ID
 const GUILD_ID = '1240722591652778075'; // Replace with your server's ID
 let previousComponentStatus = {};
@@ -21,9 +22,11 @@ async function checkCfxStatus() {
     // Retrieve status of all individual components
     const components = await status.fetchComponents();
     let currentComponentStatus = {};
+    let embeds = [];
 
     for (let component of components) {
       currentComponentStatus[component.name] = component.status;
+
       if (previousComponentStatus[component.name] && previousComponentStatus[component.name] !== component.status) {
         const embed = new EmbedBuilder()
           .setTitle('Cfx.re Component Status Update')
@@ -35,19 +38,26 @@ async function checkCfxStatus() {
           .setColor(0xFF0000)
           .setTimestamp();
 
-        const channel = await client.channels.fetch(CHANNEL_ID);
-        if (channel) {
-          channel.send({ embeds: [embed] });
-        }
+        embeds.push(embed);
       }
     }
 
     previousComponentStatus = currentComponentStatus;
+
+    // Send the status updates to the channel
+    if (embeds.length > 0) {
+      const channel = await client.channels.fetch(CHANNEL_ID);
+      for (const embed of embeds) {
+        await channel.send({ embeds: [embed] });
+      }
+    }
+    
+    return embeds;
   } catch (error) {
     console.error('Error fetching Cfx.re component status:', error);
+    return [];
   }
 }
-
 // Periodically check the status every 1 minute
 setInterval(checkCfxStatus, 60 * 1000); // Check status every 1 minute
 
@@ -81,6 +91,14 @@ async function registerCommands() {
           required: true,
         },
       ],
+    },
+    {
+      name: 'refresh-status',
+      description: 'Manually refresh the Cfx.re status'
+    },
+    {
+      name: 'news-outage',
+      description: 'Get the current Cfx.re outage status'
     },
     {
       name: 'commands',
@@ -237,7 +255,9 @@ client.on('interactionCreate', async interaction => {
           { name: '/status-cfx', value: 'Get the general Cfx.re status', inline: false },
           { name: '/status-individuals-cfx', value: 'Get the status of all individual Cfx.re components', inline: false },
           { name: '/server-info', value: 'Get server details from a Cfx.re join code', inline: false },
-          { name: '/commands', value: 'List all available commands and their descriptions', inline: false }
+          { name: '/commands', value: 'List all available commands and their descriptions', inline: false },
+          { name: '/refresh-status', value: 'Manually refresh the Cfx.re status', inline: false },
+          { name: '/news-outage', value: 'Get the current Cfx.re outage status', inline: false }
         )
         .setColor(0x00AE86)
         .setTimestamp();
@@ -248,8 +268,57 @@ client.on('interactionCreate', async interaction => {
       console.error('Error fetching commands list:', error);
       await interaction.reply('There was an error fetching the commands list. Please try again later.');
     }
+  } else if (commandName === 'refresh-status') {
+    try {
+      console.log('Manual refresh of Cfx.re status triggered.');
+      // Call the checkCfxStatus function to refresh the status
+      const embeds = await checkCfxStatus();
+      if (embeds.length > 0) {
+        await interaction.reply({ content: 'The Cfx.re status has been manually refreshed.', embeds });
+      } else {
+        await interaction.reply('No status changes detected.');
+      }
+    } catch (error) {
+      console.error('Error refreshing Cfx.re status:', error);
+      await interaction.reply('There was an error refreshing the Cfx.re status. Please try again later.');
+    }
+  } else if (commandName === 'news-outage') {
+    try {
+      // Fetch incidents using a direct request
+      const response = await axios.get('https://status.cfx.re/api/v2/incidents/unresolved.json');
+      const incidents = response.data.incidents;
+      let incidentDetails = '';
+
+      // Check if there are any incidents
+      if (incidents.length > 0) {
+        for (let incident of incidents) {
+          const affectedComponents = incident.components.map(component => component.name).join(', ');
+          const description = incident.body || (incident.incident_updates[0] && incident.incident_updates[0].body) || 'No description available';
+          incidentDetails += `**Incident:** ${incident.name}\n**Status:** ${incident.status}\n**Affected Components:** ${affectedComponents}\n**Level:** ${incident.impact}\n**Description:** ${description}\n\n`;
+        }
+
+        // Create an embed message
+        const embed = new EmbedBuilder()
+          .setTitle('Cfx.re Current Outage Status')
+          .setDescription('Here are the details of any ongoing incidents:')
+          .addFields(
+            { name: 'Incidents', value: incidentDetails, inline: false }
+          )
+          .setColor(0xFF0000)
+          .setTimestamp();
+
+        // Send the embed message
+        await interaction.reply({ embeds: [embed] });
+      } else {
+        await interaction.reply('There are no ongoing incidents at this time.');
+      }
+    } catch (error) {
+      console.error('Error fetching Cfx.re incidents:', error);
+      await interaction.reply('There was an error fetching the Cfx.re incidents. Please try again later.');
+    }
   }
 });
+
 
 // Login to Discord with your bot's token
 client.login(TOKEN);
