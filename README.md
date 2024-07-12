@@ -37,6 +37,8 @@ Get the current Cfx.re outage status
 **checkCfxStatus**
 I have implemented a check event also regarding the status of Cfx. It works in such a way that if a component's status is updated then it sends an embed log that can be configured to your liking by modifying the channel ID in the CHANNEL_ID variable
 
+# Support
+Need you support? Contact me on discord for serious issues: Nicokage#0
 
 # Preview Photos
 ![image](https://github.com/user-attachments/assets/3cdb555e-e141-4cf4-9471-0f44abd7c81e)
