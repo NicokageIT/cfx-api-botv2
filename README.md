@@ -1,18 +1,18 @@
 # "cfx-api-botv2" 
 This bot uses the cfx-api module released in August 2022 by [Pablo-1610]( https://forum.cfx.re/u/pablo-1610/) on the Cfx.re forum, but without posting a document to date for the use of NodeJS variables, consequently in the last few days I have started studying the source code and have been able to exploit it with good potential.
 
-# issues
+# Issues
 I am aware of small errors, such as tags not working or the patreon server's subscription number not showing (au, ar, pla). However, I am continuing to study the module carefully and will get to work on releasing a more innovative version. Furthermore, I am intent on creating a document on gitbook where I can transcribe all the functions made available.
 
-# discord developer site
+# Discord developer site
 1. Open [Discord Developer Site](https://discord.com/developers/applications) > New Application
 2. Then write a name of your bot, accept tos and click on "create"
 3. Now you need to go to the OAuth2 section and click on the "bot" option, in the second box you need to click on the "administrator" option. This will generate an invitation link for your new bot to join your discord server.
 4. Next go to the "Bot" section, reset the token to generate one to replace it in the "TOKEN" variable in fivem.js
 
-DISCLAIMER: remember in the "Bot" section to activate all three privileges in "Privileged Gateway Intents"
+> DISCLAIMER: remember in the "Bot" section to activate all three privileges in "Privileged Gateway Intents"
 
-# how to use
+# How to use
 1. Install [NodeJS](https://nodejs.org/en/download/package-manager) --> version 22.4.0
 2. Install [Visual Studio Code]()
 3. Open JS file, open Terminal, write and run `npm i discord.js cfx-api`
@@ -20,17 +20,33 @@ DISCLAIMER: remember in the "Bot" section to activate all three privileges in "P
 5. Then reopen terminal and run `node fivem.js`
 
 
-# available commands
-/status-cfx --> generates an embed message with the status of generic cfx.re. It expands in detail when a malfunction is occurring.
-/status-individuals-cfx --> generates a detailed embed message with the status of each cfx.re component available at https://status.cfx.re/.
-/server-info {code} --> generates an embed message with several fields of server information via the cfx.re/join code
+# Available commands + Check event
+- **/status-cfx**
+Get the general Cfx.re status
+- **/status-individuals-cfx**
+Get the status of all individual Cfx.re components
+- **/server-info**
+Get server details from a Cfx.re join code
+- **/commands**
+List all available commands and their descriptions
+- **/refresh-status**
+Manually refresh the Cfx.re status
+- **/news-outage**
+Get the current Cfx.re outage status
 
-# bonus
-I created an event called "checkCfxStatus" which updates via a message in a configurable channel of your choice in the variables above the status of cfx.re. Performs a check every minute. If you want a check every few minutes just enter the "following" string. If it doesn't work for me, let me know immediately and I will try to fix it. I haven't been able to test it yet as I need to create my own status page bees.
+**Check event**
+I have implemented a check event also regarding the status of Cfx. It works in such a way that if a component's status is updated then it sends an embed log that can be configured to your liking by modifying the channel ID in the CHANNEL_ID variable
 
-> "follow" string: `setInterval(checkCfxStatus, 5 * 60 * 1000);  // Check status every 5 minute`
 
-# Contact me on discord if you've had a problem: Nicokage#0 for serious issues
+# Preview Photos
+![image](https://github.com/user-attachments/assets/3cdb555e-e141-4cf4-9471-0f44abd7c81e)
+![image](https://github.com/user-attachments/assets/3c94a912-8c44-4ce9-84f1-f21b69acff69)
+![image](https://github.com/user-attachments/assets/a1594966-f96f-4771-8909-d07e5ba9a282)
+![image](https://github.com/user-attachments/assets/d09bc201-b462-4d85-a4c7-e02597644921)
+![image](https://github.com/user-attachments/assets/139534c4-7fb7-49fb-b61a-cfaadf83f4e4)
+![image](https://github.com/user-attachments/assets/21e8b3f0-cc30-4e14-9362-2a1e931a58a3)
+![image](https://github.com/user-attachments/assets/1de38466-4494-4e27-9406-83fae2ddad07)
+
 
 
 
