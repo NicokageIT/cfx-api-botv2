@@ -2,17 +2,16 @@ const { Client, GatewayIntentBits, EmbedBuilder, REST, Routes, AttachmentBuilder
 const cfx = require('cfx-api');
 const fs = require('fs')
 const axios = require('axios')
-
-// Create a new Discord client
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent] });
 
 
-const TOKEN = 'why_did.you,want:to;spy@on!my°token?'; // Replace with your bot's token
+const TOKEN = 'I_don\'t@let°you§to?spy^my:token'; // Replace with your bot's token
 const CHANNEL_ID = '1256200698090225756'; // Replace with your desired channel ID
 const CLIENT_ID = '1259088968444674050'; // Replace with your bot's client ID
 const GUILD_ID = '1240722591652778075'; // Replace with your server's ID
-let previousComponentStatus = {};
 
+
+let previousComponentStatus = {};
 // Function to check and send status updates
 async function checkCfxStatus() {
   try {
@@ -61,21 +60,40 @@ async function checkCfxStatus() {
 // Periodically check the status every 1 minute
 setInterval(checkCfxStatus, 60 * 1000); // Check status every 1 minute
 
-// Log in to Discord with your bot's token
-client.once('ready', () => {
-  console.log('Bot is online!');
-  registerCommands();
-  // Initial check when the bot starts
-  checkCfxStatus();
-});
+
+
+
+
+// Status Emojis
+const STATUS_EMOJIS = {
+  operational: '🟢',
+  degraded_performance: '🟡',
+  partial_outage: '⚫',
+  major_outage: '🔴',
+  under_maintenance: '⚪'
+};
+
+// Function to fetch and format Cfx.re status
+async function fetchCfxStatus() {
+  const status = await cfx.fetchStatus();
+  const components = await status.fetchComponents();
+  let statusDetails = '';
+
+  for (let component of components) {
+    const emoji = STATUS_EMOJIS[component.status] || '❓';
+    statusDetails += `${emoji} **${component.name}**: ${component.status.replace('_', ' ')}\n`;
+  }
+
+  return statusDetails;
+}
+
+
+
+
 
 // Function to register slash commands
 async function registerCommands() {
   const commands = [
-    {
-      name: 'status-cfx',
-      description: 'Get the general Cfx.re status'
-    },
     {
       name: 'status-individuals-cfx',
       description: 'Get the status of all individual Cfx.re components'
@@ -103,9 +121,25 @@ async function registerCommands() {
     {
       name: 'commands',
       description: 'List all available commands and their descriptions'
+    },
+    {
+      name: 'send-status',
+      description: 'Send the current FiveM status to a mentioned channel',
+      options: [
+        {
+          name: 'channel',
+          type: 7, // CHANNEL type
+          description: 'The channel to send the status to',
+          required: true,
+        }
+      ]
     }
   ];
 
+
+
+
+  
   const rest = new REST({ version: '10' }).setToken(TOKEN);
   try {
     console.log('Started refreshing application (/) commands.');
@@ -121,41 +155,52 @@ async function registerCommands() {
   }
 }
 
+
+
+
 // Handle interaction events
 client.on('interactionCreate', async interaction => {
   if (!interaction.isCommand()) return;
 
   const { commandName, options } = interaction;
 
-  if (commandName === 'status-cfx') {
+  // PRIMO COMANDO
+  if (commandName === 'commands') {
     try {
-      // Retrieve Cfx.re status
-      const status = await cfx.fetchStatus();
-      const generalStatus = status.everythingOk ? "All Cfx.re systems are operational" : "Cfx.re is experiencing issues";
-
-      // Create an embed message
+      // Create an embed message with the list of commands
       const embed = new EmbedBuilder()
-        .setTitle('Cfx.re Status')
-        .setDescription(generalStatus)
+        .setTitle('Available Commands')
+        .setDescription('Here is a list of all available commands and their descriptions:')
+        .addFields(
+          { name: '/status-individuals-cfx', value: 'Get the status of all individual Cfx.re components', inline: false },
+          { name: '/server-info', value: 'Get server details from a Cfx.re join code', inline: false },
+          { name: '/commands', value: 'List all available commands and their descriptions', inline: false },
+          { name: '/refresh-status', value: 'Manually refresh the Cfx.re status', inline: false },
+          { name: '/news-outage', value: 'Get the current Cfx.re outage status', inline: false },
+          { name: '/send-status <channel>', value: 'Send the current FiveM status to a mentioned channel' }
+        )
         .setColor(0x00AE86)
         .setTimestamp();
 
       // Send the embed message
       await interaction.reply({ embeds: [embed] });
     } catch (error) {
-      console.error('Error fetching Cfx.re status:', error);
-      await interaction.reply('There was an error fetching the Cfx.re status. Please try again later.');
+      console.error('Error fetching commands list:', error);
+      await interaction.reply('There was an error fetching the commands list. Please try again later.');
     }
-  } else if (commandName === 'status-individuals-cfx') {
+  } 
+  // SECONDO COMANDO
+  else if (commandName === 'status-individuals-cfx') {
     try {
       // Retrieve Cfx.re status
       const status = await cfx.fetchStatus();
-      
+
       // Retrieve status of all individual components
       const components = await status.fetchComponents();
       let componentStatus = '';
       for (let component of components) {
-        componentStatus += `${component.name}: ${component.status}\n`;
+        const emoji = STATUS_EMOJIS[component.status] || '❓';
+        componentStatus += `${emoji} **${component.name}**: ${component.status.replace('_', ' ')}\n`;
       }
 
       // Create an embed message
@@ -174,7 +219,9 @@ client.on('interactionCreate', async interaction => {
       console.error('Error fetching Cfx.re component status:', error);
       await interaction.reply('There was an error fetching the Cfx.re component status. Please try again later.');
     }
-  } else if (commandName === 'server-info') {
+  } 
+  // TERZO COMANDO
+  else if (commandName === 'server-info') {
     const code = options.getString('code');
     try {
       // Retrieve server details using the provided code
@@ -236,6 +283,8 @@ client.on('interactionCreate', async interaction => {
           { name: 'Last Seen', value: lastSeen, inline: true },
           { name: 'Tags', value: tags, inline: false }
         )
+        .setFooter({ text: `Requested by ${interaction.user.tag}`, iconURL: interaction.user.avatarURL() })
+        .setThumbnail(ownerAvatar)
         .setColor(0x00AE86)
         .setTimestamp();
 
@@ -245,30 +294,9 @@ client.on('interactionCreate', async interaction => {
       console.error('Error fetching Cfx.re server info:', error);
       await interaction.reply('There was an error fetching the server info. Please try again later.');
     }
-  } else if (commandName === 'commands') {
-    try {
-      // Create an embed message with the list of commands
-      const embed = new EmbedBuilder()
-        .setTitle('Available Commands')
-        .setDescription('Here is a list of all available commands and their descriptions:')
-        .addFields(
-          { name: '/status-cfx', value: 'Get the general Cfx.re status', inline: false },
-          { name: '/status-individuals-cfx', value: 'Get the status of all individual Cfx.re components', inline: false },
-          { name: '/server-info', value: 'Get server details from a Cfx.re join code', inline: false },
-          { name: '/commands', value: 'List all available commands and their descriptions', inline: false },
-          { name: '/refresh-status', value: 'Manually refresh the Cfx.re status', inline: false },
-          { name: '/news-outage', value: 'Get the current Cfx.re outage status', inline: false }
-        )
-        .setColor(0x00AE86)
-        .setTimestamp();
-
-      // Send the embed message
-      await interaction.reply({ embeds: [embed] });
-    } catch (error) {
-      console.error('Error fetching commands list:', error);
-      await interaction.reply('There was an error fetching the commands list. Please try again later.');
-    }
-  } else if (commandName === 'refresh-status') {
+  } 
+  // QUARTO COMANDO
+  else if (commandName === 'refresh-status') {
     try {
       console.log('Manual refresh of Cfx.re status triggered.');
       // Call the checkCfxStatus function to refresh the status
@@ -282,7 +310,9 @@ client.on('interactionCreate', async interaction => {
       console.error('Error refreshing Cfx.re status:', error);
       await interaction.reply('There was an error refreshing the Cfx.re status. Please try again later.');
     }
-  } else if (commandName === 'news-outage') {
+  } 
+  // QUINTO COMANDO
+  else if (commandName === 'news-outage') {
     try {
       // Fetch incidents using a direct request
       const response = await axios.get('https://status.cfx.re/api/v2/incidents/unresolved.json');
@@ -316,9 +346,38 @@ client.on('interactionCreate', async interaction => {
       console.error('Error fetching Cfx.re incidents:', error);
       await interaction.reply('There was an error fetching the Cfx.re incidents. Please try again later.');
     }
+  } 
+  // SESTO COMANDO
+  else if (commandName === 'send-status') {
+    const channel = options.getChannel('channel');
+    try {
+      const statusDetails = await fetchCfxStatus();
+      const embed = new EmbedBuilder()
+        .setTitle('FiveM Status')
+        .setDescription(statusDetails)
+        .setColor(0x00AE86)
+        .setTimestamp();
+
+      await channel.send({ embeds: [embed] });
+      await interaction.reply(`Status sent to ${channel.toString()}`);
+    } catch (error) {
+      console.error('Error sending status:', error);
+      await interaction.reply('There was an error sending the status. Please try again later.');
+    }
   }
 });
 
+
+
+
+
+// Log in to Discord with your bot's token
+client.once('ready', () => {
+  console.log('Bot is online!');
+  registerCommands();
+  // Initial check when the bot starts
+  checkCfxStatus();
+});
 
 // Login to Discord with your bot's token
 client.login(TOKEN);
