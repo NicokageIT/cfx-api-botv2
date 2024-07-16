@@ -8,7 +8,7 @@ I am aware of small errors, such as tags not working or the patreon server's sub
 1. Open [Discord Developer Site](https://discord.com/developers/applications) > New Application
 2. Then write a name of your bot, accept tos and click on "create"
 3. Now you need to go to the OAuth2 section and click on the "bot" option, in the second box you need to click on the "administrator" option. This will generate an invitation link for your new bot to join your discord server.
-4. Next go to the "Bot" section, reset the token to generate one to replace it in the "TOKEN" variable in fivem.js
+4. Next go to the "Bot" section, reset the token to generate one to replace it in the "TOKEN" variable in config.js
 
 > DISCLAIMER: remember in the "Bot" section to activate all three privileges in "Privileged Gateway Intents"
 
@@ -16,8 +16,8 @@ I am aware of small errors, such as tags not working or the patreon server's sub
 1. Install [NodeJS](https://nodejs.org/en/download/package-manager) --> version 22.4.0
 2. Install [Visual Studio Code]()
 3. Open JS file, open Terminal, write and run `npm i discord.js cfx-api`
-4. Configure fivem.js file in "CHANNEL_ID", "GUILD_ID", "CLIENT_ID"
-5. Then reopen terminal and run `node fivem.js`
+4. Configure "CHANNEL_ID", "GUILD_ID", "CLIENT_ID" in config.js file 
+5. Then reopen terminal and run `node index.js`
 
 
 # Available commands + Check event
